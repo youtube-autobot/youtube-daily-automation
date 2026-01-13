@@ -1,0 +1,32 @@
+name: Daily YouTube Auto-Poster
+on:
+  schedule:
+    - cron: '0 14 * * *'  # 2:00 PM UTC daily
+  workflow_dispatch:  # Manual trigger
+
+jobs:
+  create-and-upload:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+      
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+      
+    - name: Generate today's video
+      run: python video_generator.py
+      
+    - name: Upload to YouTube
+      run: python youtube_uploader.py
+      env:
+        YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+        YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+        
+    - name: Log success
+      run: echo "🎉 Video uploaded at $(date)"
